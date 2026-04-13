@@ -425,11 +425,12 @@ body::before {
 .dept-option.selected.learn { background: var(--learn-bg); border-color: var(--learn-border); color: var(--learn); }
 .dept-option.selected.create { background: var(--create-bg); border-color: var(--create-border); color: var(--create); }
 .dept-option.selected.good { background: var(--good-bg); border-color: var(--good-border); color: var(--good); }
-.btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
 .btn-toggle {
   font-family: 'Noto Sans TC', sans-serif;
   font-size: 13px;
-  padding: 8px 14px;
+  padding: 8px 6px;
+  text-align: center;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -485,7 +486,6 @@ body::before {
   .modal h2 { font-size: 18px; margin-bottom: 16px; }
   .form-group { margin-bottom: 12px; }
   .dept-select-group { flex-wrap: wrap; }
-  .btn-group { flex-wrap: wrap; }
   .modal-actions { margin-top: 20px; }
   .timeline-event { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
   .event-date { width: auto; }
