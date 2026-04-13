@@ -426,6 +426,8 @@ body::before {
       <h1>活動排程行事曆<span>2026</span></h1>
     </div>
     <div class="header-actions">
+      <button class="btn" onclick="document.getElementById('importFile').click()">⬆ 匯入 JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
       <button class="btn" onclick="exportData()">⬇ 匯出 JSON</button>
       <button class="btn btn-primary" onclick="openModal()">＋ 新增活動</button>
     </div>
@@ -823,15 +825,27 @@ function exportData() {
 }
 
 // Import (for future use)
-function importData(jsonStr) {
-  try {
-    const data = JSON.parse(jsonStr);
-    if (Array.isArray(data)) {
-      events = data;
+function handleImport(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) { alert('匯入格式錯誤'); return; }
+      if (events.length > 0 && !confirm(`目前有 ${events.length} 筆資料，要覆蓋還是合併？\n\n確定 → 合併\n取消 → 覆蓋`)) {
+        events = data;
+      } else {
+        const existIds = new Set(events.map(e => e.id));
+        data.forEach(d => { if (!existIds.has(d.id)) events.push(d); });
+      }
       save();
       render();
-    }
-  } catch(e) { alert('匯入格式錯誤'); }
+      alert(`匯入完成，共 ${events.length} 筆活動`);
+    } catch(err) { alert('匯入格式錯誤'); }
+    evt.target.value = '';
+  };
+  reader.readAsText(file);
 }
 
 // Init
