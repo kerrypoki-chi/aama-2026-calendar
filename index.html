@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AAMA 2026 活動排程行事曆</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg: #F4F5F7;
@@ -67,15 +67,13 @@ body::before {
 }
 .header-left { display: flex; align-items: center; gap: 16px; }
 .logo {
-  font-family: 'Space Mono', monospace;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-muted);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: 6px;
-  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  height: 36px;
+}
+.logo svg {
+  height: 36px;
+  width: auto;
 }
 .header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
 .header h1 span { color: var(--text-muted); font-weight: 300; margin-left: 8px; }
@@ -133,7 +131,7 @@ body::before {
 .stat-card.create::after { background: var(--create); }
 .stat-card.good::after { background: var(--good); }
 .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
-.stat-value { font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; }
+.stat-value { font-family: 'Poppins', sans-serif; font-size: 36px; font-weight: 700; }
 .stat-card.learn .stat-value { color: var(--learn); }
 .stat-card.create .stat-value { color: var(--create); }
 .stat-card.good .stat-value { color: var(--good); }
@@ -209,7 +207,7 @@ body::before {
   margin-bottom: 16px;
 }
 .month-name { font-size: 18px; font-weight: 600; }
-.month-num { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-dim); }
+.month-num { font-family: 'Poppins', sans-serif; font-size: 11px; color: var(--text-dim); }
 .month-bars { display: flex; flex-direction: column; gap: 8px; }
 .dept-row {
   display: flex;
@@ -239,7 +237,7 @@ body::before {
 .dept-bar.create { background: var(--create); }
 .dept-bar.good { background: var(--good); }
 .dept-count {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Poppins', sans-serif;
   font-size: 12px;
   color: var(--text-dim);
   width: 20px;
@@ -268,7 +266,7 @@ body::before {
   justify-content: space-between;
 }
 .timeline-month-count {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Poppins', sans-serif;
   font-size: 12px;
   color: var(--text-muted);
 }
@@ -294,7 +292,7 @@ body::before {
 .event-dept-dot.create { background: var(--create); }
 .event-dept-dot.good { background: var(--good); }
 .event-date {
-  font-family: 'Space Mono', monospace;
+  font-family: 'Poppins', sans-serif;
   font-size: 12px;
   color: var(--text-muted);
   width: 60px;
@@ -410,8 +408,8 @@ body::before {
   <!-- Header -->
   <div class="header">
     <div class="header-left">
-      <span class="logo">AAMA</span>
-      <h1>活動排程行事曆<span>2026</span></h1>
+      <span class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 781.43 363"><defs><style>.cls-1{fill:#414042}.cls-2{fill:#0e7ee2;fill-rule:evenodd}.cls-3{fill:#ff9e3e;fill-rule:evenodd}</style></defs><g id="Layer_1" data-name="Layer 1"><path class="cls-3" d="M583.05,12.53s-156.52-39.34-325.23,21.43C87.63,95.27,4.46,218.01,4.46,218.01h56.92s71.2-121.85,230.05-174.27c0,0,128.98-50.26,291.61-31.21Z"/><path class="cls-2" d="M733.73,87.95l-81.87,91.4v-91.4h-34.63l-81.85,91.39v-91.39h-34.63l-81.86,91.4v-91.4h-34.63l-81.87,91.4v-91.4h-34.63l-116.49,130.06h34.63c15.61-17.43,35.36-30.65,57.43-38.43l24.43-8.62v47.06h34.64c15.61-17.43,35.36-30.65,57.43-38.43l24.43-8.62v47.06h34.63l81.86-91.41v91.4h0s34.63,0,34.63,0l81.85-91.41v91.41h34.64c15.61-17.43,35.36-30.65,57.43-38.43l24.42-8.62v47.06h34.63V87.95h-34.63.02ZM267.75,170.03h-38.89l38.89-43.43v43.43ZM384.25,170.03h-38.89l38.89-43.43v43.43ZM733.73,170.03h-38.89l38.89-43.43v43.43Z"/><path class="cls-1" d="M627.96,286.15h35.99v-9.02h-80.94v9.02h35.99v35.72h-40.49v9.51h40.49v31.48h8.96v-31.48h40.49v-9.51h-40.49v-35.72Z"/><path class="cls-1" d="M595.19,294.59h-11.87l13.91,21.26h12.39l-14.43-21.26Z"/><path class="cls-1" d="M649.56,315.84l13.9-21.26h-11.86l-14.44,21.26h12.4Z"/><path class="cls-1" d="M433.82,300.07v-9.01h-19.13v-17.7h-9.72v17.69h-26.6v-17.69h-9.72v17.69h-19.13v9.01h19.13v22.93h-22.12v8.63h90.67v-8.63h-22.49v-22.93h19.13-.01ZM404.97,323h-26.6v-22.93h26.6v22.93Z"/><path class="cls-1" d="M382.56,336.26l-33.49,15.38v10.41l33.49-15.61v-10.18Z"/><path class="cls-1" d="M434.65,362.05l-33.49-15.38v-10.41l33.49,15.6v10.19Z"/><path class="cls-1" d="M294.57,300.96l26.32-19.36h-14.73l-8.66,6.28v-4.98h-20.97v-9.76h-10.12v9.77h-23.98v8.27h23.98v9.77h-32.22v8.64h33.32l-39.1,28.32h15.92l4.83-3.55v28.63h10.12v-4.52h42.72v4.52h9.73v-44.34h-41.21l12.3-9.04h40.89v-8.64h-29.14.01s0,0,0,0ZM276.5,300.96v-9.77h16.43l-13.5,9.77h-2.93ZM301.97,350.98h-42.72v-8.65h42.72v8.65ZM301.97,335.18h-42.72v-8.64h42.72v8.64Z"/><path class="cls-1" d="M699.64,362.86h10.12v-5.64h48.33v5.64h10.49v-42.12h-68.95v42.12ZM709.76,330.16h48.33v18.43h-48.33v-18.43Z"/><path class="cls-1" d="M768.79,315.73h12.64l-28.46-29.31h-12.64l14.79,15.55h-41.01l27.19-28.48h-13.42l-27.17,28.48h-10.07l5.78,9.66h67.92l4.45,4.11Z"/><path class="cls-1" d="M543.12,348.47c0,1.84-1.48,3.32-3.31,3.32h-12.8l7.49,9.03h5.19c6.86,0,12.41-5.58,12.41-12.45v-74.5h-8.99v74.6h.01Z"/><path class="cls-1" d="M536.16,340.04v-56.77h-8.62v12.92l-23.89-23.24h-12.74l-27.65,27.19h12.18l10.22-10.03v5.19h22.8v-5.64h-22.33l11.19-10.96,22.11,21.43h8.12v39.9h8.62Z"/><path class="cls-1" d="M482.58,332.52c.24-.76.37-1.37.37-1.88h36.34v-30.52h-43.84v12.46c.75,18.04-2.5,31.21-9.74,39.48.49.5,1.62,1.75,3.38,3.76,1.25,1.51,2.12,2.5,2.63,3.01,4.5-6.52,7.49-12.41,8.99-17.68v19.92h8.24v-4.13h23.23v4.13h8.24v-24.44h-38.59c.24-.75.49-2.12.75-4.13h-.03s0,.02,0,.02ZM484.08,306.58h26.6v6.01h-26.6v-6.01ZM483.71,318.24h26.98v6.01h-26.98v-6.01ZM488.95,343.06h23.23v7.89h-23.23v-7.89Z"/><path class="cls-1" d="M71.26,360.81h5.19c6.86,0,12.41-5.58,12.41-12.46v-74.49h-8.99v74.6c0,1.84-1.48,3.32-3.31,3.32h-12.8l7.49,9.03h.01s0,0,0,0Z"/><path class="cls-1" d="M5.85,355.84c1.25,1.51,2.12,2.51,2.63,3.01,4.5-6.52,7.49-12.41,8.99-17.68v19.93h8.24v-4.13h23.23v4.13h8.24v-24.44H18.59c.24-.75.49-2.12.75-4.13.24-.76.37-1.37.37-1.88h36.34v-30.52H12.22v12.46c.75,18.04-2.5,31.2-9.73,39.48.49.5,1.62,1.75,3.38,3.76h-.01v.02ZM25.72,343.05h23.23v7.89h-23.23v-7.89ZM20.83,306.58h26.6v6.01h-26.6v-6.01ZM20.46,318.24h26.98v6.01h-26.98v-6.01Z"/><path class="cls-1" d="M22.42,290.11v5.19h22.8v-5.64h-22.34l11.19-10.96,22.11,21.43h8.13v39.9h8.61v-56.77h-8.61v12.92l-23.89-23.24h-12.74L0,300.14h12.18l10.23-10.03Z"/><path class="cls-1" d="M206.62,361.14l-31.4-19.2h29.04v-7.52h-39.34v-6.01h29.61v-7.15h-29.61v-6.01h35.22v-7.52h-20.95l6.26-8.64h18.81v-7.52h-28.85v-18.73h-9.36v18.7h-12.36v-18.7h-9.37v18.7h-28.1v7.52h18.41l6.28,8.64h-20.95v7.52h35.22v6.01h-30.73v7.15h30.73v6.01h-38.97v7.52h29.04l-31.4,19.2,15.84-.11,25.49-16.49v18.49h9.73v-18.72l25.86,16.71,15.83.14h0ZM152.93,307.7l-6.13-8.64h27.1l-6.74,8.64h-14.24,0Z"/><path class="cls-1" d="M141.68,288.24l-10.63-10.82h-11.53l10.37,10.82h11.79Z"/><path class="cls-1" d="M199.8,277.42h-11.54l-10.63,10.82h11.77l10.39-10.82Z"/></g></svg></span>
+      <h1>活動排程行事曆</h1>
     </div>
     <div class="header-actions">
       <button class="btn btn-primary" onclick="openModal()">＋ 新增活動</button>
