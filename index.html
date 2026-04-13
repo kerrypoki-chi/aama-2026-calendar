@@ -295,8 +295,9 @@ body::before {
   font-family: 'Poppins', sans-serif;
   font-size: 12px;
   color: var(--text-muted);
-  width: 60px;
+  width: 80px;
   flex-shrink: 0;
+  line-height: 1.5;
 }
 .event-title { flex: 1; font-size: 14px; }
 .event-dept-tag {
@@ -528,9 +529,25 @@ body::before {
         <button class="dept-option good" data-dept="共好" onclick="selectDept(this)">共好</button>
       </div>
     </div>
-    <div class="form-group">
-      <label>日期</label>
-      <input type="date" id="eventDate">
+    <div class="form-group" style="display:flex;gap:12px;">
+      <div style="flex:1;">
+        <label>開始日期</label>
+        <input type="date" id="eventDate">
+      </div>
+      <div style="flex:1;">
+        <label>結束日期（選填，多天活動）</label>
+        <input type="date" id="eventEndDate">
+      </div>
+    </div>
+    <div class="form-group" style="display:flex;gap:12px;">
+      <div style="flex:1;">
+        <label>開始時間（選填）</label>
+        <input type="time" id="eventStartTime">
+      </div>
+      <div style="flex:1;">
+        <label>結束時間（選填）</label>
+        <input type="time" id="eventEndTime">
+      </div>
     </div>
     <div class="form-group">
       <label>類型</label>
@@ -722,10 +739,19 @@ function renderTimeline() {
       monthEvents.forEach(e => {
         const cls = DEPT_CLASS[e.dept];
         const d = new Date(e.date);
-        const dateStr = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
+        const dateStr = (() => {
+          const s = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
+          if (e.endDate && e.endDate !== e.date) {
+            const ed = new Date(e.endDate);
+            const es = `${(ed.getMonth()+1).toString().padStart(2,'0')}/${ed.getDate().toString().padStart(2,'0')}`;
+            return `${s}–${es}`;
+          }
+          return s;
+        })();
+        const timeStr = e.startTime ? (e.endTime ? `${e.startTime}–${e.endTime}` : e.startTime) : '';
         html += `<div class="timeline-event">
           <div class="event-dept-dot ${cls}"></div>
-          <span class="event-date">${dateStr}</span>
+          <span class="event-date">${dateStr}${timeStr ? '<br>' + timeStr : ''}</span>
           <span class="event-title">${e.name}${e.type ? ' (' + e.type + ')' : ''}${e.target && (Array.isArray(e.target) ? e.target.length : e.target) ? ' ｜' + (Array.isArray(e.target) ? e.target.join('、') : e.target) : ''}${e.location ? ' 📍' + e.location : ''}${e.note ? ' — ' + e.note : ''}</span>
           <span class="event-dept-tag ${cls}">${e.dept}</span>
           <span class="event-status-tag ${e.status==='已完成'?'done':e.status==='籌備中'?'preparing':'tentative'}">${e.status||'籌備中'}</span>
@@ -813,6 +839,9 @@ function openModal(id) {
     if (!e) return;
     document.getElementById('eventName').value = e.name;
     document.getElementById('eventDate').value = e.date;
+    document.getElementById('eventEndDate').value = e.endDate || '';
+    document.getElementById('eventStartTime').value = e.startTime || '';
+    document.getElementById('eventEndTime').value = e.endTime || '';
     document.getElementById('eventType').value = e.type || '課程 / 工作坊 / LAB';
     // Restore target buttons (multi-select)
     const targets = Array.isArray(e.target) ? e.target : (e.target ? [e.target] : []);
@@ -835,6 +864,9 @@ function openModal(id) {
   } else {
     document.getElementById('eventName').value = '';
     document.getElementById('eventDate').value = '';
+    document.getElementById('eventEndDate').value = '';
+    document.getElementById('eventStartTime').value = '';
+    document.getElementById('eventEndTime').value = '';
     document.getElementById('eventType').value = '課程 / 工作坊 / LAB';
     document.querySelectorAll('#targetGroup .btn-toggle').forEach(b => b.classList.remove('selected'));
     document.querySelectorAll('#statusGroup .btn-toggle').forEach(b => {
@@ -873,6 +905,9 @@ function selectStatus(btn) {
 async function saveEvent() {
   const name = document.getElementById('eventName').value.trim();
   const date = document.getElementById('eventDate').value;
+  const endDate = document.getElementById('eventEndDate').value;
+  const startTime = document.getElementById('eventStartTime').value;
+  const endTime = document.getElementById('eventEndTime').value;
   const type = document.getElementById('eventType').value;
   const target = Array.from(document.querySelectorAll('#targetGroup .btn-toggle.selected')).map(b => b.dataset.value);
   const statusBtn = document.querySelector('#statusGroup .btn-toggle.selected');
@@ -888,9 +923,9 @@ async function saveEvent() {
   const dept = deptBtn.dataset.dept;
 
   if (editingId) {
-    await updateDoc(doc(db, 'events', editingId), { name, dept, date, type, target, status, location, note });
+    await updateDoc(doc(db, 'events', editingId), { name, dept, date, endDate, startTime, endTime, type, target, status, location, note });
   } else {
-    await addDoc(eventsCol, { name, dept, date, type, target, status, location, note });
+    await addDoc(eventsCol, { name, dept, date, endDate, startTime, endTime, type, target, status, location, note });
   }
   closeModal();
   await loadEvents();
