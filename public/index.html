@@ -558,15 +558,17 @@ body::before {
 const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 const DEPT_CLASS = { '共學': 'learn', '共創': 'create', '共好': 'good' };
 
-let events = JSON.parse(localStorage.getItem('aama2026_events') || '[]');
+let events = [];
 let currentView = 'grid';
 let currentFilter = 'all';
 let currentTargetFilter = new Set();
 let currentStatusFilter = 'all';
 let editingId = null;
 
-function save() {
-  localStorage.setItem('aama2026_events', JSON.stringify(events));
+async function loadEvents() {
+  const res = await fetch('/api/events');
+  events = await res.json();
+  render();
 }
 
 function getFiltered() {
@@ -779,7 +781,7 @@ function selectDept(btn) {
   btn.classList.add('selected');
 }
 
-function saveEvent() {
+async function saveEvent() {
   const name = document.getElementById('eventName').value.trim();
   const date = document.getElementById('eventDate').value;
   const type = document.getElementById('eventType').value;
@@ -795,25 +797,31 @@ function saveEvent() {
   const dept = deptBtn.dataset.dept;
 
   if (editingId) {
-    const idx = events.findIndex(e => e.id === editingId);
-    if (idx >= 0) events[idx] = { ...events[idx], name, dept, date, type, target, status, note };
+    await fetch('/api/events/' + editingId, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, dept, date, type, target, status, note })
+    });
   } else {
-    events.push({ id: 'evt_' + Date.now(), name, dept, date, type, target, status, note });
+    const id = 'evt_' + Date.now();
+    await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, name, dept, date, type, target, status, note })
+    });
   }
-  save();
   closeModal();
-  render();
+  await loadEvents();
 }
 
 function editEvent(id) {
   openModal(id);
 }
 
-function deleteEvent(id) {
+async function deleteEvent(id) {
   if (!confirm('確定要刪除這個活動嗎？')) return;
-  events = events.filter(e => e.id !== id);
-  save();
-  render();
+  await fetch('/api/events/' + id, { method: 'DELETE' });
+  await loadEvents();
 }
 
 function exportData() {
@@ -829,19 +837,22 @@ function handleImport(evt) {
   const file = evt.target.files[0];
   if (!file) return;
   const reader = new FileReader();
-  reader.onload = function(e) {
+  reader.onload = async function(e) {
     try {
       const data = JSON.parse(e.target.result);
       if (!Array.isArray(data)) { alert('匯入格式錯誤'); return; }
+      let mode = 'merge';
       if (events.length > 0 && !confirm(`目前有 ${events.length} 筆資料，要覆蓋還是合併？\n\n確定 → 合併\n取消 → 覆蓋`)) {
-        events = data;
-      } else {
-        const existIds = new Set(events.map(e => e.id));
-        data.forEach(d => { if (!existIds.has(d.id)) events.push(d); });
+        mode = 'overwrite';
       }
-      save();
-      render();
-      alert(`匯入完成，共 ${events.length} 筆活動`);
+      const res = await fetch('/api/events/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ events: data, mode })
+      });
+      const result = await res.json();
+      await loadEvents();
+      alert(`匯入完成，共 ${result.count} 筆活動`);
     } catch(err) { alert('匯入格式錯誤'); }
     evt.target.value = '';
   };
@@ -849,7 +860,7 @@ function handleImport(evt) {
 }
 
 // Init
-render();
+loadEvents();
 </script>
 </body>
 </html>
