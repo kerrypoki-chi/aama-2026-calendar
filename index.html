@@ -408,6 +408,27 @@ body::before {
 .btn-toggle.status-tentative { background: var(--create-bg); border-color: var(--create-border); color: var(--create); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; }
 
+/* Year tabs */
+.year-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.year-tab {
+  font-family: 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 8px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.year-tab:hover { border-color: var(--text-dim); }
+.year-tab.active { background: var(--learn); border-color: var(--learn); color: #fff; }
+
 /* Responsive */
 @media (max-width: 900px) {
   .calendar-grid { grid-template-columns: repeat(2, 1fr); }
@@ -432,6 +453,9 @@ body::before {
       <button class="btn btn-primary" onclick="openModal()">＋ 新增活動</button>
     </div>
   </div>
+
+  <!-- Year Tabs -->
+  <div class="year-tabs" id="yearTabs"></div>
 
   <!-- Stats -->
   <div class="stats-bar">
@@ -506,7 +530,7 @@ body::before {
     </div>
     <div class="form-group">
       <label>日期</label>
-      <input type="date" id="eventDate" min="2026-01-01" max="2026-12-31">
+      <input type="date" id="eventDate">
     </div>
     <div class="form-group">
       <label>類型</label>
@@ -576,6 +600,7 @@ const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','
 const DEPT_CLASS = { '共學': 'learn', '共創': 'create', '共好': 'good' };
 
 let events = [];
+let currentYear = 2026;
 let currentView = 'grid';
 let currentFilter = 'all';
 let currentTargetFilter = new Set();
@@ -589,7 +614,7 @@ async function loadEvents() {
 }
 
 function getFiltered() {
-  let filtered = events;
+  let filtered = events.filter(e => new Date(e.date).getFullYear() === currentYear);
   if (currentFilter !== 'all') filtered = filtered.filter(e => e.dept === currentFilter);
   if (currentTargetFilter.size > 0) filtered = filtered.filter(e => {
     const t = Array.isArray(e.target) ? e.target : (e.target ? [e.target] : []);
@@ -599,8 +624,22 @@ function getFiltered() {
   return filtered;
 }
 
+function renderYearTabs() {
+  const years = new Set(events.map(e => new Date(e.date).getFullYear()));
+  years.add(2026); // always show 2026
+  const sorted = [...years].sort();
+  document.getElementById('yearTabs').innerHTML = sorted.map(y =>
+    `<button class="year-tab${y === currentYear ? ' active' : ''}" onclick="setYear(${y})">${y}</button>`
+  ).join('');
+}
+
+function setYear(year) {
+  currentYear = year;
+  render();
+}
+
 function updateStats() {
-  const all = events;
+  const all = events.filter(e => new Date(e.date).getFullYear() === currentYear);
   document.getElementById('totalCount').textContent = all.length;
   document.getElementById('learnCount').textContent = all.filter(e => e.dept === '共學').length;
   document.getElementById('createCount').textContent = all.filter(e => e.dept === '共創').length;
@@ -703,6 +742,7 @@ function renderTimeline() {
 }
 
 function render() {
+  renderYearTabs();
   updateStats();
   renderGrid();
   renderTimeline();
@@ -868,7 +908,7 @@ async function deleteEvent(id) {
 
 // Expose functions to window for inline onclick handlers
 Object.assign(window, {
-  switchView, scrollToMonth, setFilter, setTargetFilter, setStatusFilter,
+  setYear, switchView, scrollToMonth, setFilter, setTargetFilter, setStatusFilter,
   openModal, closeModal, selectDept, toggleTarget, selectStatus,
   saveEvent, editEvent, deleteEvent
 });
