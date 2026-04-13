@@ -204,6 +204,8 @@ body::before {
   transition: all 0.25s;
   cursor: pointer;
   position: relative;
+  min-width: 0;
+  overflow: hidden;
 }
 .month-card:hover { border-color: var(--text-dim); transform: translateY(-2px); box-shadow: var(--shadow); }
 .month-header {
@@ -263,13 +265,14 @@ body::before {
   padding: 6px 8px;
   background: var(--surface-alt);
   border-radius: 6px;
+  min-width: 0;
 }
 .month-event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .month-event-dot.learn { background: var(--learn); }
 .month-event-dot.create { background: var(--create); }
 .month-event-dot.good { background: var(--good); }
 .month-event-date { font-family: 'Poppins', sans-serif; font-size: 12px; color: var(--text-muted); width: 40px; flex-shrink: 0; font-weight: 500; }
-.month-event-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 500; }
+.month-event-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); font-weight: 500; }
 .month-event-status { font-size: 11px; padding: 2px 8px; border-radius: 8px; flex-shrink: 0; font-weight: 500; }
 
 /* Timeline view */
