@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "aama-calendar",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "cwd": "/Users/tzuchilin/chi/aama-2026-calendar",
+      "port": 3000
+    }
+  ]
+}

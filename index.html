@@ -554,7 +554,23 @@ body::before {
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js';
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, writeBatch, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDEeJz2Bs-O9SHAR5rEmWkGMwnZKL1xYzQ",
+  authDomain: "aama-2026-calendar.firebaseapp.com",
+  projectId: "aama-2026-calendar",
+  storageBucket: "aama-2026-calendar.firebasestorage.app",
+  messagingSenderId: "628776433373",
+  appId: "1:628776433373:web:01cb641759904aa27d8d34"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const eventsCol = collection(db, 'events');
+
 const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
 const DEPT_CLASS = { '共學': 'learn', '共創': 'create', '共好': 'good' };
 
@@ -566,8 +582,8 @@ let currentStatusFilter = 'all';
 let editingId = null;
 
 async function loadEvents() {
-  const res = await fetch('/api/events');
-  events = await res.json();
+  const snap = await getDocs(query(eventsCol, orderBy('date')));
+  events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   render();
 }
 
@@ -797,18 +813,9 @@ async function saveEvent() {
   const dept = deptBtn.dataset.dept;
 
   if (editingId) {
-    await fetch('/api/events/' + editingId, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, dept, date, type, target, status, note })
-    });
+    await updateDoc(doc(db, 'events', editingId), { name, dept, date, type, target, status, note });
   } else {
-    const id = 'evt_' + Date.now();
-    await fetch('/api/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, name, dept, date, type, target, status, note })
-    });
+    await addDoc(eventsCol, { name, dept, date, type, target, status, note });
   }
   closeModal();
   await loadEvents();
@@ -820,7 +827,7 @@ function editEvent(id) {
 
 async function deleteEvent(id) {
   if (!confirm('確定要刪除這個活動嗎？')) return;
-  await fetch('/api/events/' + id, { method: 'DELETE' });
+  await deleteDoc(doc(db, 'events', id));
   await loadEvents();
 }
 
@@ -841,23 +848,32 @@ function handleImport(evt) {
     try {
       const data = JSON.parse(e.target.result);
       if (!Array.isArray(data)) { alert('匯入格式錯誤'); return; }
-      let mode = 'merge';
+      let overwrite = false;
       if (events.length > 0 && !confirm(`目前有 ${events.length} 筆資料，要覆蓋還是合併？\n\n確定 → 合併\n取消 → 覆蓋`)) {
-        mode = 'overwrite';
+        overwrite = true;
       }
-      const res = await fetch('/api/events/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ events: data, mode })
-      });
-      const result = await res.json();
+      if (overwrite) {
+        const batch = writeBatch(db);
+        events.forEach(ev => batch.delete(doc(db, 'events', ev.id)));
+        await batch.commit();
+      }
+      for (const d of data) {
+        await addDoc(eventsCol, { name: d.name, dept: d.dept, date: d.date, type: d.type||'', target: d.target||'', status: d.status||'籌備中', note: d.note||'' });
+      }
       await loadEvents();
-      alert(`匯入完成，共 ${result.count} 筆活動`);
+      alert(`匯入完成，共 ${events.length} 筆活動`);
     } catch(err) { alert('匯入格式錯誤'); }
     evt.target.value = '';
   };
   reader.readAsText(file);
 }
+
+// Expose functions to window for inline onclick handlers
+Object.assign(window, {
+  switchView, scrollToMonth, setFilter, setTargetFilter, setStatusFilter,
+  openModal, closeModal, selectDept, saveEvent, editEvent, deleteEvent,
+  exportData, handleImport
+});
 
 // Init
 loadEvents();
