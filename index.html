@@ -389,6 +389,23 @@ body::before {
 .dept-option.selected.learn { background: var(--learn-bg); border-color: var(--learn-border); color: var(--learn); }
 .dept-option.selected.create { background: var(--create-bg); border-color: var(--create-border); color: var(--create); }
 .dept-option.selected.good { background: var(--good-bg); border-color: var(--good-border); color: var(--good); }
+.btn-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn-toggle {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--text-muted);
+}
+.btn-toggle:hover { border-color: var(--text-dim); }
+.btn-toggle.selected { background: var(--learn-bg); border-color: var(--learn-border); color: var(--learn); }
+.btn-toggle.status-done { background: var(--good-bg); border-color: var(--good-border); color: var(--good); }
+.btn-toggle.status-preparing { background: var(--learn-bg); border-color: var(--learn-border); color: var(--learn); }
+.btn-toggle.status-tentative { background: var(--create-bg); border-color: var(--create-border); color: var(--create); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; }
 
 /* Responsive */
@@ -494,33 +511,38 @@ body::before {
     <div class="form-group">
       <label>類型</label>
       <select id="eventType">
-        <option value="課程/工作坊">課程/工作坊</option>
+        <option value="課程 / 工作坊 / LAB">課程 / 工作坊 / LAB</option>
         <option value="Peer Coaching / 共學營">Peer Coaching / 共學營</option>
-        <option value="創業營">創業營</option>
+        <option value="創業營 / 導生見面會 / 結業式 / 迎新送舊">創業營 / 導生見面會 / 結業式 / 迎新送舊</option>
         <option value="分享會">分享會</option>
         <option value="社群年會 / 年度活動">社群年會 / 年度活動</option>
         <option value="Beer Night">Beer Night</option>
         <option value="小旅行 / 藝文活動">小旅行 / 藝文活動</option>
+        <option value="外部合作活動">外部合作活動</option>
         <option value="其他">其他</option>
       </select>
     </div>
     <div class="form-group">
-      <label>對象類別</label>
-      <select id="eventTarget">
-        <option value="搖籃計畫">搖籃計畫</option>
-        <option value="Academy">Academy</option>
-        <option value="全社群">全社群</option>
-        <option value="次社群">次社群</option>
-        <option value="其他">其他</option>
-      </select>
+      <label>對象類別（可多選）</label>
+      <div class="btn-group" id="targetGroup">
+        <button type="button" class="btn-toggle" data-value="搖籃計畫" onclick="toggleTarget(this)">搖籃計畫</button>
+        <button type="button" class="btn-toggle" data-value="Academy" onclick="toggleTarget(this)">Academy</button>
+        <button type="button" class="btn-toggle" data-value="全社群" onclick="toggleTarget(this)">全社群</button>
+        <button type="button" class="btn-toggle" data-value="次社群" onclick="toggleTarget(this)">次社群</button>
+        <button type="button" class="btn-toggle" data-value="其他" onclick="toggleTarget(this)">其他</button>
+      </div>
     </div>
     <div class="form-group">
       <label>狀態</label>
-      <select id="eventStatus">
-        <option value="籌備中">籌備中</option>
-        <option value="暫定">暫定</option>
-        <option value="已完成">已完成</option>
-      </select>
+      <div class="btn-group" id="statusGroup">
+        <button type="button" class="btn-toggle" data-value="籌備中" onclick="selectStatus(this)">籌備中</button>
+        <button type="button" class="btn-toggle" data-value="暫定" onclick="selectStatus(this)">暫定</button>
+        <button type="button" class="btn-toggle" data-value="已完成" onclick="selectStatus(this)">已完成</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>地點（選填）</label>
+      <input type="text" id="eventLocation" placeholder="例如：台北小巨蛋">
     </div>
     <div class="form-group">
       <label>備註（選填）</label>
@@ -569,7 +591,10 @@ async function loadEvents() {
 function getFiltered() {
   let filtered = events;
   if (currentFilter !== 'all') filtered = filtered.filter(e => e.dept === currentFilter);
-  if (currentTargetFilter.size > 0) filtered = filtered.filter(e => currentTargetFilter.has(e.target));
+  if (currentTargetFilter.size > 0) filtered = filtered.filter(e => {
+    const t = Array.isArray(e.target) ? e.target : (e.target ? [e.target] : []);
+    return t.some(v => currentTargetFilter.has(v));
+  });
   if (currentStatusFilter !== 'all') filtered = filtered.filter(e => e.status === currentStatusFilter);
   return filtered;
 }
@@ -662,7 +687,7 @@ function renderTimeline() {
         html += `<div class="timeline-event">
           <div class="event-dept-dot ${cls}"></div>
           <span class="event-date">${dateStr}</span>
-          <span class="event-title">${e.name}${e.type ? ' (' + e.type + ')' : ''}${e.target ? ' ｜' + e.target : ''}${e.note ? ' — ' + e.note : ''}</span>
+          <span class="event-title">${e.name}${e.type ? ' (' + e.type + ')' : ''}${e.target && (Array.isArray(e.target) ? e.target.length : e.target) ? ' ｜' + (Array.isArray(e.target) ? e.target.join('、') : e.target) : ''}${e.location ? ' 📍' + e.location : ''}${e.note ? ' — ' + e.note : ''}</span>
           <span class="event-dept-tag ${cls}">${e.dept}</span>
           <span class="event-status-tag ${e.status==='已完成'?'done':e.status==='籌備中'?'preparing':'tentative'}">${e.status||'籌備中'}</span>
           <div class="event-actions">
@@ -748,18 +773,34 @@ function openModal(id) {
     if (!e) return;
     document.getElementById('eventName').value = e.name;
     document.getElementById('eventDate').value = e.date;
-    document.getElementById('eventType').value = e.type || '課程/工作坊';
-    document.getElementById('eventTarget').value = e.target || '搖籃計畫';
-    document.getElementById('eventStatus').value = e.status || '籌備中';
+    document.getElementById('eventType').value = e.type || '課程 / 工作坊 / LAB';
+    // Restore target buttons (multi-select)
+    const targets = Array.isArray(e.target) ? e.target : (e.target ? [e.target] : []);
+    document.querySelectorAll('#targetGroup .btn-toggle').forEach(b => {
+      b.classList.toggle('selected', targets.includes(b.dataset.value));
+    });
+    // Restore status button
+    const st = e.status || '籌備中';
+    document.querySelectorAll('#statusGroup .btn-toggle').forEach(b => {
+      const sel = b.dataset.value === st;
+      b.classList.toggle('selected', sel);
+      b.classList.toggle('status-done', sel && st === '已完成');
+      b.classList.toggle('status-preparing', sel && st === '籌備中');
+      b.classList.toggle('status-tentative', sel && st === '暫定');
+    });
+    document.getElementById('eventLocation').value = e.location || '';
     document.getElementById('eventNote').value = e.note || '';
     const deptBtn = document.querySelector(`.dept-option[data-dept="${e.dept}"]`);
     if (deptBtn) deptBtn.classList.add('selected');
   } else {
     document.getElementById('eventName').value = '';
     document.getElementById('eventDate').value = '';
-    document.getElementById('eventType').value = '課程/工作坊';
-    document.getElementById('eventTarget').value = '搖籃計畫';
-    document.getElementById('eventStatus').value = '籌備中';
+    document.getElementById('eventType').value = '課程 / 工作坊 / LAB';
+    document.querySelectorAll('#targetGroup .btn-toggle').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('#statusGroup .btn-toggle').forEach(b => {
+      b.classList.remove('selected', 'status-done', 'status-preparing', 'status-tentative');
+    });
+    document.getElementById('eventLocation').value = '';
     document.getElementById('eventNote').value = '';
   }
   document.getElementById('modalOverlay').classList.add('active');
@@ -776,12 +817,27 @@ function selectDept(btn) {
   btn.classList.add('selected');
 }
 
+function toggleTarget(btn) {
+  btn.classList.toggle('selected');
+}
+
+function selectStatus(btn) {
+  document.querySelectorAll('#statusGroup .btn-toggle').forEach(b => {
+    b.classList.remove('selected', 'status-done', 'status-preparing', 'status-tentative');
+  });
+  btn.classList.add('selected');
+  const v = btn.dataset.value;
+  btn.classList.add(v === '已完成' ? 'status-done' : v === '籌備中' ? 'status-preparing' : 'status-tentative');
+}
+
 async function saveEvent() {
   const name = document.getElementById('eventName').value.trim();
   const date = document.getElementById('eventDate').value;
   const type = document.getElementById('eventType').value;
-  const target = document.getElementById('eventTarget').value;
-  const status = document.getElementById('eventStatus').value;
+  const target = Array.from(document.querySelectorAll('#targetGroup .btn-toggle.selected')).map(b => b.dataset.value);
+  const statusBtn = document.querySelector('#statusGroup .btn-toggle.selected');
+  const status = statusBtn ? statusBtn.dataset.value : '籌備中';
+  const location = document.getElementById('eventLocation').value.trim();
   const note = document.getElementById('eventNote').value.trim();
   const deptBtn = document.querySelector('.dept-option.selected');
 
@@ -792,9 +848,9 @@ async function saveEvent() {
   const dept = deptBtn.dataset.dept;
 
   if (editingId) {
-    await updateDoc(doc(db, 'events', editingId), { name, dept, date, type, target, status, note });
+    await updateDoc(doc(db, 'events', editingId), { name, dept, date, type, target, status, location, note });
   } else {
-    await addDoc(eventsCol, { name, dept, date, type, target, status, note });
+    await addDoc(eventsCol, { name, dept, date, type, target, status, location, note });
   }
   closeModal();
   await loadEvents();
@@ -813,7 +869,8 @@ async function deleteEvent(id) {
 // Expose functions to window for inline onclick handlers
 Object.assign(window, {
   switchView, scrollToMonth, setFilter, setTargetFilter, setStatusFilter,
-  openModal, closeModal, selectDept, saveEvent, editEvent, deleteEvent
+  openModal, closeModal, selectDept, toggleTarget, selectStatus,
+  saveEvent, editEvent, deleteEvent
 });
 
 // Init
