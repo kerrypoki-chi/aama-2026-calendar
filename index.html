@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AAMA 2026 活動排程行事曆</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F4F5F7;
+  --surface: #FFFFFF;
+  --surface-alt: #F0F1F3;
+  --border: #E0E2E8;
+  --text: #1A1D27;
+  --text-muted: #6B7085;
+  --text-dim: #9CA0B0;
+
+  /* Department colors */
+  --learn: #0e7ee2;
+  --learn-bg: rgba(14,126,226,0.08);
+  --learn-border: rgba(14,126,226,0.25);
+  --create: #e88a20;
+  --create-bg: rgba(232,138,32,0.08);
+  --create-border: rgba(232,138,32,0.25);
+  --good: #5da815;
+  --good-bg: rgba(93,168,21,0.08);
+  --good-border: rgba(93,168,21,0.25);
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Subtle grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { position: relative; z-index: 1; max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+
+/* Header */
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.header-left { display: flex; align-items: center; gap: 16px; }
+.logo {
+  font-family: 'Space Mono', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  letter-spacing: 2px;
+}
+.header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+.header h1 span { color: var(--text-muted); font-weight: 300; margin-left: 8px; }
+.header-actions { display: flex; gap: 10px; }
+
+/* Buttons */
+.btn {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn:hover { background: var(--surface-alt); border-color: var(--text-dim); }
+.btn-primary { background: var(--learn); border-color: var(--learn); color: #fff; }
+.btn-primary:hover { background: #2563EB; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-icon {
+  width: 32px; height: 32px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px; font-size: 16px;
+}
+
+/* Stats bar */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card.total::after { background: linear-gradient(90deg, var(--learn), var(--create), var(--good)); }
+.stat-card.learn::after { background: var(--learn); }
+.stat-card.create::after { background: var(--create); }
+.stat-card.good::after { background: var(--good); }
+.stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+.stat-value { font-family: 'Space Mono', monospace; font-size: 36px; font-weight: 700; }
+.stat-card.learn .stat-value { color: var(--learn); }
+.stat-card.create .stat-value { color: var(--create); }
+.stat-card.good .stat-value { color: var(--good); }
+
+/* View toggle */
+.view-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.view-tabs {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.view-tab {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 13px;
+  padding: 8px 20px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.view-tab.active { background: var(--surface-alt); color: var(--text); }
+.view-tab:hover:not(.active) { color: var(--text); }
+
+.filter-group { display: flex; gap: 8px; }
+.filter-chip {
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 12px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-chip.active { color: #fff; }
+.filter-chip.active[data-dept="共學"] { background: var(--learn-bg); border-color: var(--learn-border); color: var(--learn); }
+.filter-chip.active[data-dept="共創"] { background: var(--create-bg); border-color: var(--create-border); color: var(--create); }
+.filter-chip.active[data-dept="共好"] { background: var(--good-bg); border-color: var(--good-border); color: var(--good); }
+.filter-chip.active[data-dept="all"] { background: var(--surface-alt); color: var(--text); border-color: var(--text-dim); }
+
+/* Calendar grid */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.month-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all 0.25s;
+  cursor: pointer;
+  position: relative;
+}
+.month-card:hover { border-color: var(--text-dim); transform: translateY(-2px); box-shadow: var(--shadow); }
+.month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+.month-name { font-size: 18px; font-weight: 600; }
+.month-num { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-dim); }
+.month-bars { display: flex; flex-direction: column; gap: 8px; }
+.dept-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dept-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 30px;
+  flex-shrink: 0;
+}
+.dept-bar-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dept-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s cubic-bezier(0.16,1,0.3,1);
+  min-width: 0;
+}
+.dept-bar.learn { background: var(--learn); }
+.dept-bar.create { background: var(--create); }
+.dept-bar.good { background: var(--good); }
+.dept-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  width: 20px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Timeline view */
+.timeline { display: none; }
+.timeline.active { display: block; }
+.calendar-grid.hidden { display: none; }
+
+.timeline-month {
+  margin-bottom: 24px;
+}
+.timeline-month-header {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.timeline-month-count {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.timeline-events { display: flex; flex-direction: column; gap: 4px; padding-left: 16px; }
+.timeline-event {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+  position: relative;
+}
+.timeline-event:hover { border-color: var(--text-dim); }
+.event-dept-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.event-dept-dot.learn { background: var(--learn); }
+.event-dept-dot.create { background: var(--create); }
+.event-dept-dot.good { background: var(--good); }
+.event-date {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 60px;
+  flex-shrink: 0;
+}
+.event-title { flex: 1; font-size: 14px; }
+.event-dept-tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.event-dept-tag.learn { background: var(--learn-bg); color: var(--learn); }
+.event-dept-tag.create { background: var(--create-bg); color: var(--create); }
+.event-dept-tag.good { background: var(--good-bg); color: var(--good); }
+.event-status-tag {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.event-status-tag.done { background: var(--good-bg); color: var(--good); }
+.event-status-tag.preparing { background: var(--learn-bg); color: var(--learn); }
+.event-status-tag.tentative { background: var(--create-bg); color: var(--create); }
+.event-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
+.timeline-event:hover .event-actions { opacity: 1; }
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px;
+  width: 480px;
+  max-width: 90vw;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+  animation: modalIn 0.25s ease;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal h2 { font-size: 20px; font-weight: 600; margin-bottom: 24px; }
+.form-group { margin-bottom: 18px; }
+.form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+.form-group input, .form-group select, .form-group textarea {
+  font-family: 'Noto Sans TC', sans-serif;
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--learn); }
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-group select { cursor: pointer; }
+.dept-select-group { display: flex; gap: 8px; }
+.dept-option {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Noto Sans TC', sans-serif;
+}
+.dept-option:hover { border-color: var(--text-dim); }
+.dept-option.selected.learn { background: var(--learn-bg); border-color: var(--learn-border); color: var(--learn); }
+.dept-option.selected.create { background: var(--create-bg); border-color: var(--create-border); color: var(--create); }
+.dept-option.selected.good { background: var(--good-bg); border-color: var(--good-border); color: var(--good); }
+.modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; }
+
+/* Export panel */
+.export-info {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 24px;
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.8;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .calendar-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-bar { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .calendar-grid { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: 1fr; }
+  .header { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <span class="logo">AAMA</span>
+      <h1>活動排程行事曆<span>2026</span></h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn" onclick="exportData()">⬇ 匯出 JSON</button>
+      <button class="btn btn-primary" onclick="openModal()">＋ 新增活動</button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-card total">
+      <div class="stat-label">全年活動總數</div>
+      <div class="stat-value" id="totalCount">0</div>
+    </div>
+    <div class="stat-card learn">
+      <div class="stat-label">共學</div>
+      <div class="stat-value" id="learnCount">0</div>
+    </div>
+    <div class="stat-card create">
+      <div class="stat-label">共創</div>
+      <div class="stat-value" id="createCount">0</div>
+    </div>
+    <div class="stat-card good">
+      <div class="stat-label">共好</div>
+      <div class="stat-value" id="goodCount">0</div>
+    </div>
+  </div>
+
+  <!-- View Controls -->
+  <div class="view-controls">
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="switchView('grid')">月曆總覽</button>
+      <button class="view-tab" onclick="switchView('timeline')">時間軸</button>
+    </div>
+    <div class="filter-group">
+      <button class="filter-chip active" data-dept="all" onclick="setFilter('all')">全部</button>
+      <button class="filter-chip" data-dept="共學" onclick="setFilter('共學')">共學</button>
+      <button class="filter-chip" data-dept="共創" onclick="setFilter('共創')">共創</button>
+      <button class="filter-chip" data-dept="共好" onclick="setFilter('共好')">共好</button>
+    </div>
+    <div class="filter-group">
+      <button class="filter-chip active" data-target="all" onclick="setTargetFilter('all')">全部對象</button>
+      <button class="filter-chip" data-target="搖籃計畫" onclick="setTargetFilter('搖籃計畫')">搖籃計畫</button>
+      <button class="filter-chip" data-target="Academy" onclick="setTargetFilter('Academy')">Academy</button>
+      <button class="filter-chip" data-target="全社群" onclick="setTargetFilter('全社群')">全社群</button>
+      <button class="filter-chip" data-target="次社群" onclick="setTargetFilter('次社群')">次社群</button>
+    </div>
+    <div class="filter-group">
+      <button class="filter-chip active" data-status="all" onclick="setStatusFilter('all')">全部狀態</button>
+      <button class="filter-chip" data-status="已完成" onclick="setStatusFilter('已完成')">已完成</button>
+      <button class="filter-chip" data-status="籌備中" onclick="setStatusFilter('籌備中')">籌備中</button>
+      <button class="filter-chip" data-status="暫定" onclick="setStatusFilter('暫定')">暫定</button>
+    </div>
+  </div>
+
+  <!-- Grid View -->
+  <div class="calendar-grid" id="calendarGrid"></div>
+
+  <!-- Timeline View -->
+  <div class="timeline" id="timelineView"></div>
+
+  <!-- Export Info -->
+  <div class="export-info">
+    💡 <strong>使用方式：</strong>點擊「＋ 新增活動」可加入新活動。在時間軸模式下可以看到活動詳細資訊，滑鼠移到活動上可編輯或刪除。資料儲存在瀏覽器中，重新整理不會遺失。點擊「匯出 JSON」可將資料備份。
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modalTitle">新增活動</h2>
+    <div class="form-group">
+      <label>活動名稱</label>
+      <input type="text" id="eventName" placeholder="例如：創業者心法講座">
+    </div>
+    <div class="form-group">
+      <label>所屬部門</label>
+      <div class="dept-select-group">
+        <button class="dept-option learn" data-dept="共學" onclick="selectDept(this)">共學</button>
+        <button class="dept-option create" data-dept="共創" onclick="selectDept(this)">共創</button>
+        <button class="dept-option good" data-dept="共好" onclick="selectDept(this)">共好</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>日期</label>
+      <input type="date" id="eventDate" min="2026-01-01" max="2026-12-31">
+    </div>
+    <div class="form-group">
+      <label>類型</label>
+      <select id="eventType">
+        <option value="課程/工作坊">課程/工作坊</option>
+        <option value="Peer Coaching / 共學營">Peer Coaching / 共學營</option>
+        <option value="創業營">創業營</option>
+        <option value="分享會">分享會</option>
+        <option value="社群年會 / 年度活動">社群年會 / 年度活動</option>
+        <option value="Beer Night">Beer Night</option>
+        <option value="小旅行 / 藝文活動">小旅行 / 藝文活動</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>對象類別</label>
+      <select id="eventTarget">
+        <option value="搖籃計畫">搖籃計畫</option>
+        <option value="Academy">Academy</option>
+        <option value="全社群">全社群</option>
+        <option value="次社群">次社群</option>
+        <option value="其他">其他</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>狀態</label>
+      <select id="eventStatus">
+        <option value="籌備中">籌備中</option>
+        <option value="暫定">暫定</option>
+        <option value="已完成">已完成</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>備註（選填）</label>
+      <textarea id="eventNote" placeholder="活動說明或注意事項"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveEvent()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MONTHS = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const DEPT_CLASS = { '共學': 'learn', '共創': 'create', '共好': 'good' };
+
+let events = JSON.parse(localStorage.getItem('aama2026_events') || '[]');
+let currentView = 'grid';
+let currentFilter = 'all';
+let currentTargetFilter = new Set();
+let currentStatusFilter = 'all';
+let editingId = null;
+
+function save() {
+  localStorage.setItem('aama2026_events', JSON.stringify(events));
+}
+
+function getFiltered() {
+  let filtered = events;
+  if (currentFilter !== 'all') filtered = filtered.filter(e => e.dept === currentFilter);
+  if (currentTargetFilter.size > 0) filtered = filtered.filter(e => currentTargetFilter.has(e.target));
+  if (currentStatusFilter !== 'all') filtered = filtered.filter(e => e.status === currentStatusFilter);
+  return filtered;
+}
+
+function updateStats() {
+  const all = events;
+  document.getElementById('totalCount').textContent = all.length;
+  document.getElementById('learnCount').textContent = all.filter(e => e.dept === '共學').length;
+  document.getElementById('createCount').textContent = all.filter(e => e.dept === '共創').length;
+  document.getElementById('goodCount').textContent = all.filter(e => e.dept === '共好').length;
+}
+
+function getMonthData() {
+  const data = [];
+  const filtered = getFiltered();
+  const maxPerDept = Math.max(1, ...MONTHS.map((_, m) => {
+    return Math.max(
+      filtered.filter(e => new Date(e.date).getMonth() === m && e.dept === '共學').length,
+      filtered.filter(e => new Date(e.date).getMonth() === m && e.dept === '共創').length,
+      filtered.filter(e => new Date(e.date).getMonth() === m && e.dept === '共好').length
+    );
+  }));
+
+  for (let m = 0; m < 12; m++) {
+    const monthEvents = filtered.filter(e => new Date(e.date).getMonth() === m);
+    data.push({
+      month: m,
+      name: MONTHS[m],
+      learn: monthEvents.filter(e => e.dept === '共學').length,
+      create: monthEvents.filter(e => e.dept === '共創').length,
+      good: monthEvents.filter(e => e.dept === '共好').length,
+      total: monthEvents.length,
+      max: maxPerDept
+    });
+  }
+  return data;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('calendarGrid');
+  const data = getMonthData();
+  grid.innerHTML = data.map(d => `
+    <div class="month-card" onclick="switchView('timeline');scrollToMonth(${d.month})">
+      <div class="month-header">
+        <span class="month-name">${d.name}</span>
+        <span class="month-num">${d.total} 場</span>
+      </div>
+      <div class="month-bars">
+        <div class="dept-row">
+          <span class="dept-label">共學</span>
+          <div class="dept-bar-track"><div class="dept-bar learn" style="width:${d.max?d.learn/d.max*100:0}%"></div></div>
+          <span class="dept-count">${d.learn}</span>
+        </div>
+        <div class="dept-row">
+          <span class="dept-label">共創</span>
+          <div class="dept-bar-track"><div class="dept-bar create" style="width:${d.max?d.create/d.max*100:0}%"></div></div>
+          <span class="dept-count">${d.create}</span>
+        </div>
+        <div class="dept-row">
+          <span class="dept-label">共好</span>
+          <div class="dept-bar-track"><div class="dept-bar good" style="width:${d.max?d.good/d.max*100:0}%"></div></div>
+          <span class="dept-count">${d.good}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTimeline() {
+  const container = document.getElementById('timelineView');
+  const filtered = getFiltered().sort((a, b) => a.date.localeCompare(b.date));
+  let html = '';
+
+  for (let m = 0; m < 12; m++) {
+    const monthEvents = filtered.filter(e => new Date(e.date).getMonth() === m);
+    html += `<div class="timeline-month" id="month-${m}">
+      <div class="timeline-month-header">
+        <span>${MONTHS[m]}</span>
+        <span class="timeline-month-count">${monthEvents.length} 場活動</span>
+      </div>
+      <div class="timeline-events">`;
+
+    if (monthEvents.length === 0) {
+      html += `<div class="empty-state">尚無活動，點擊右上角新增</div>`;
+    } else {
+      monthEvents.forEach(e => {
+        const cls = DEPT_CLASS[e.dept];
+        const d = new Date(e.date);
+        const dateStr = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
+        html += `<div class="timeline-event">
+          <div class="event-dept-dot ${cls}"></div>
+          <span class="event-date">${dateStr}</span>
+          <span class="event-title">${e.name}${e.type ? ' (' + e.type + ')' : ''}${e.target ? ' ｜' + e.target : ''}${e.note ? ' — ' + e.note : ''}</span>
+          <span class="event-dept-tag ${cls}">${e.dept}</span>
+          <span class="event-status-tag ${e.status==='已完成'?'done':e.status==='籌備中'?'preparing':'tentative'}">${e.status||'籌備中'}</span>
+          <div class="event-actions">
+            <button class="btn btn-icon btn-sm" onclick="event.stopPropagation();editEvent('${e.id}')" title="編輯">✎</button>
+            <button class="btn btn-icon btn-sm" onclick="event.stopPropagation();deleteEvent('${e.id}')" title="刪除">✕</button>
+          </div>
+        </div>`;
+      });
+    }
+    html += `</div></div>`;
+  }
+  container.innerHTML = html;
+}
+
+function render() {
+  updateStats();
+  renderGrid();
+  renderTimeline();
+}
+
+function switchView(view) {
+  currentView = view;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  if (view === 'grid') {
+    document.querySelectorAll('.view-tab')[0].classList.add('active');
+    document.getElementById('calendarGrid').classList.remove('hidden');
+    document.getElementById('timelineView').classList.remove('active');
+  } else {
+    document.querySelectorAll('.view-tab')[1].classList.add('active');
+    document.getElementById('calendarGrid').classList.add('hidden');
+    document.getElementById('timelineView').classList.add('active');
+  }
+}
+
+function scrollToMonth(m) {
+  setTimeout(() => {
+    const el = document.getElementById('month-' + m);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+function setFilter(dept) {
+  currentFilter = dept;
+  document.querySelectorAll('.filter-chip[data-dept]').forEach(c => {
+    c.classList.toggle('active', c.dataset.dept === dept);
+  });
+  render();
+}
+
+function setTargetFilter(target) {
+  if (target === 'all') {
+    currentTargetFilter.clear();
+  } else if (currentTargetFilter.has(target)) {
+    currentTargetFilter.delete(target);
+  } else {
+    currentTargetFilter.add(target);
+  }
+  document.querySelectorAll('.filter-chip[data-target]').forEach(c => {
+    if (c.dataset.target === 'all') {
+      c.classList.toggle('active', currentTargetFilter.size === 0);
+    } else {
+      c.classList.toggle('active', currentTargetFilter.has(c.dataset.target));
+    }
+  });
+  render();
+}
+
+function setStatusFilter(status) {
+  currentStatusFilter = status;
+  document.querySelectorAll('.filter-chip[data-status]').forEach(c => {
+    c.classList.toggle('active', c.dataset.status === status);
+  });
+  render();
+}
+
+function openModal(id) {
+  editingId = id || null;
+  document.getElementById('modalTitle').textContent = id ? '編輯活動' : '新增活動';
+  document.querySelectorAll('.dept-option').forEach(o => o.classList.remove('selected'));
+
+  if (id) {
+    const e = events.find(ev => ev.id === id);
+    if (!e) return;
+    document.getElementById('eventName').value = e.name;
+    document.getElementById('eventDate').value = e.date;
+    document.getElementById('eventType').value = e.type || '課程/工作坊';
+    document.getElementById('eventTarget').value = e.target || '搖籃計畫';
+    document.getElementById('eventStatus').value = e.status || '籌備中';
+    document.getElementById('eventNote').value = e.note || '';
+    const deptBtn = document.querySelector(`.dept-option[data-dept="${e.dept}"]`);
+    if (deptBtn) deptBtn.classList.add('selected');
+  } else {
+    document.getElementById('eventName').value = '';
+    document.getElementById('eventDate').value = '';
+    document.getElementById('eventType').value = '課程/工作坊';
+    document.getElementById('eventTarget').value = '搖籃計畫';
+    document.getElementById('eventStatus').value = '籌備中';
+    document.getElementById('eventNote').value = '';
+  }
+  document.getElementById('modalOverlay').classList.add('active');
+  setTimeout(() => document.getElementById('eventName').focus(), 100);
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  editingId = null;
+}
+
+function selectDept(btn) {
+  document.querySelectorAll('.dept-option').forEach(o => o.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function saveEvent() {
+  const name = document.getElementById('eventName').value.trim();
+  const date = document.getElementById('eventDate').value;
+  const type = document.getElementById('eventType').value;
+  const target = document.getElementById('eventTarget').value;
+  const status = document.getElementById('eventStatus').value;
+  const note = document.getElementById('eventNote').value.trim();
+  const deptBtn = document.querySelector('.dept-option.selected');
+
+  if (!name) { alert('請輸入活動名稱'); return; }
+  if (!deptBtn) { alert('請選擇所屬部門'); return; }
+  if (!date) { alert('請選擇日期'); return; }
+
+  const dept = deptBtn.dataset.dept;
+
+  if (editingId) {
+    const idx = events.findIndex(e => e.id === editingId);
+    if (idx >= 0) events[idx] = { ...events[idx], name, dept, date, type, target, status, note };
+  } else {
+    events.push({ id: 'evt_' + Date.now(), name, dept, date, type, target, status, note });
+  }
+  save();
+  closeModal();
+  render();
+}
+
+function editEvent(id) {
+  openModal(id);
+}
+
+function deleteEvent(id) {
+  if (!confirm('確定要刪除這個活動嗎？')) return;
+  events = events.filter(e => e.id !== id);
+  save();
+  render();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(events, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'aama-2026-events.json';
+  a.click();
+}
+
+// Import (for future use)
+function importData(jsonStr) {
+  try {
+    const data = JSON.parse(jsonStr);
+    if (Array.isArray(data)) {
+      events = data;
+      save();
+      render();
+    }
+  } catch(e) { alert('匯入格式錯誤'); }
+}
+
+// Init
+render();
+</script>
+</body>
+</html>
