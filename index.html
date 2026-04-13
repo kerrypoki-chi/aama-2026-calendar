@@ -245,6 +245,24 @@ body::before {
   flex-shrink: 0;
 }
 
+/* Month card event list */
+.month-events { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.month-event-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.month-event-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.month-event-dot.learn { background: var(--learn); }
+.month-event-dot.create { background: var(--create); }
+.month-event-dot.good { background: var(--good); }
+.month-event-date { font-family: 'Poppins', sans-serif; font-size: 11px; color: var(--text-dim); width: 36px; flex-shrink: 0; }
+.month-event-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.month-event-status { font-size: 10px; padding: 1px 6px; border-radius: 8px; flex-shrink: 0; }
+
 /* Timeline view */
 .timeline { display: none; }
 .timeline.active { display: block; }
@@ -327,6 +345,51 @@ body::before {
   color: var(--text-dim);
   font-size: 14px;
 }
+
+/* Card view */
+.card-view { display: none; }
+.card-view.active { display: block; }
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.event-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  position: relative;
+  transition: all 0.25s;
+  cursor: default;
+  border-left: 4px solid transparent;
+}
+.event-card:hover { border-color: var(--text-dim); transform: translateY(-2px); box-shadow: var(--shadow); }
+.event-card.learn { border-left-color: var(--learn); }
+.event-card.create { border-left-color: var(--create); }
+.event-card.good { border-left-color: var(--good); }
+.event-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 8px; }
+.event-card-name { font-size: 15px; font-weight: 600; flex: 1; line-height: 1.4; }
+.event-card-status {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.event-card-meta { display: flex; flex-direction: column; gap: 6px; }
+.event-card-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+.event-card-row svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.5; }
+.event-card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.event-card-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--surface-alt);
+  color: var(--text-muted);
+}
+.event-card-actions { position: absolute; top: 12px; right: 12px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
+.event-card:hover .event-card-actions { opacity: 1; }
 
 /* Modal */
 .modal-overlay {
@@ -482,6 +545,7 @@ body::before {
   <div class="view-controls">
     <div class="view-tabs">
       <button class="view-tab active" onclick="switchView('grid')">月曆總覽</button>
+      <button class="view-tab" onclick="switchView('cards')">卡片</button>
       <button class="view-tab" onclick="switchView('timeline')">時間軸</button>
     </div>
     <div class="filter-group">
@@ -507,6 +571,9 @@ body::before {
 
   <!-- Grid View -->
   <div class="calendar-grid" id="calendarGrid"></div>
+
+  <!-- Card View -->
+  <div class="card-view" id="cardView"></div>
 
   <!-- Timeline View -->
   <div class="timeline" id="timelineView"></div>
@@ -692,7 +759,24 @@ function getMonthData() {
 function renderGrid() {
   const grid = document.getElementById('calendarGrid');
   const data = getMonthData();
-  grid.innerHTML = data.map(d => `
+  const filtered = getFiltered();
+  grid.innerHTML = data.map(d => {
+    const monthEvents = filtered
+      .filter(e => new Date(e.date).getMonth() === d.month)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const eventList = monthEvents.map(e => {
+      const cls = DEPT_CLASS[e.dept];
+      const dd = new Date(e.date);
+      const ds = `${(dd.getMonth()+1).toString().padStart(2,'0')}/${dd.getDate().toString().padStart(2,'0')}`;
+      const statusCls = e.status==='已完成'?'done':e.status==='籌備中'?'preparing':'tentative';
+      return `<div class="month-event-item">
+        <span class="month-event-dot ${cls}"></span>
+        <span class="month-event-date">${ds}</span>
+        <span class="month-event-name">${e.name}</span>
+        <span class="month-event-status event-status-tag ${statusCls}">${e.status||'籌備中'}</span>
+      </div>`;
+    }).join('');
+    return `
     <div class="month-card" onclick="switchView('timeline');scrollToMonth(${d.month})">
       <div class="month-header">
         <span class="month-name">${d.name}</span>
@@ -715,8 +799,9 @@ function renderGrid() {
           <span class="dept-count">${d.good}</span>
         </div>
       </div>
-    </div>
-  `).join('');
+      ${monthEvents.length ? '<div class="month-events">' + eventList + '</div>' : ''}
+    </div>`;
+  }).join('');
 }
 
 function renderTimeline() {
@@ -767,25 +852,77 @@ function renderTimeline() {
   container.innerHTML = html;
 }
 
+function renderCards() {
+  const container = document.getElementById('cardView');
+  const filtered = getFiltered().sort((a, b) => a.date.localeCompare(b.date));
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty-state">尚無活動，點擊右上角新增</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="card-grid">' + filtered.map(e => {
+    const cls = DEPT_CLASS[e.dept];
+    const d = new Date(e.date);
+    const dateStr = (() => {
+      const s = `${(d.getMonth()+1).toString().padStart(2,'0')}/${d.getDate().toString().padStart(2,'0')}`;
+      if (e.endDate && e.endDate !== e.date) {
+        const ed = new Date(e.endDate);
+        return `${s} – ${(ed.getMonth()+1).toString().padStart(2,'0')}/${ed.getDate().toString().padStart(2,'0')}`;
+      }
+      return s;
+    })();
+    const timeStr = e.startTime ? (e.endTime ? `${e.startTime}–${e.endTime}` : e.startTime) : '';
+    const statusCls = e.status==='已完成'?'done':e.status==='籌備中'?'preparing':'tentative';
+    const targets = Array.isArray(e.target) ? e.target : (e.target ? [e.target] : []);
+
+    return `<div class="event-card ${cls}">
+      <div class="event-card-actions">
+        <button class="btn btn-icon btn-sm" onclick="editEvent('${e.id}')" title="編輯">✎</button>
+        <button class="btn btn-icon btn-sm" onclick="deleteEvent('${e.id}')" title="刪除">✕</button>
+      </div>
+      <div class="event-card-header">
+        <span class="event-card-name">${e.name}</span>
+        <span class="event-card-status event-status-tag ${statusCls}">${e.status||'籌備中'}</span>
+      </div>
+      <div class="event-card-meta">
+        <div class="event-card-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          ${dateStr}${timeStr ? ' · ' + timeStr : ''}
+        </div>
+        <div class="event-card-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span class="event-dept-tag ${cls}">${e.dept}</span>
+          ${e.type ? '<span class="event-card-tag">' + e.type + '</span>' : ''}
+        </div>
+        ${e.location ? `<div class="event-card-row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${e.location}</div>` : ''}
+      </div>
+      ${targets.length ? '<div class="event-card-tags">' + targets.map(t => '<span class="event-card-tag">' + t + '</span>').join('') + '</div>' : ''}
+    </div>`;
+  }).join('') + '</div>';
+}
+
 function render() {
   renderYearTabs();
   updateStats();
   renderGrid();
+  renderCards();
   renderTimeline();
 }
 
 function switchView(view) {
   currentView = view;
   document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
-  if (view === 'grid') {
-    document.querySelectorAll('.view-tab')[0].classList.add('active');
-    document.getElementById('calendarGrid').classList.remove('hidden');
-    document.getElementById('timelineView').classList.remove('active');
-  } else {
-    document.querySelectorAll('.view-tab')[1].classList.add('active');
-    document.getElementById('calendarGrid').classList.add('hidden');
-    document.getElementById('timelineView').classList.add('active');
-  }
+  const tabs = document.querySelectorAll('.view-tab');
+  const grid = document.getElementById('calendarGrid');
+  const cards = document.getElementById('cardView');
+  const timeline = document.getElementById('timelineView');
+  grid.classList.add('hidden');
+  cards.classList.remove('active');
+  timeline.classList.remove('active');
+  if (view === 'grid') { tabs[0].classList.add('active'); grid.classList.remove('hidden'); }
+  else if (view === 'cards') { tabs[1].classList.add('active'); cards.classList.add('active'); }
+  else { tabs[2].classList.add('active'); timeline.classList.add('active'); }
 }
 
 function scrollToMonth(m) {
