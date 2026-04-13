@@ -3,10 +3,10 @@
   "configurations": [
     {
       "name": "aama-calendar",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["start"],
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "3456"],
       "cwd": "/Users/tzuchilin/chi/aama-2026-calendar",
-      "port": 3000
+      "port": 3456
     }
   ]
 }
