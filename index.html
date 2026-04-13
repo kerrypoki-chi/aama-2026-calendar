@@ -725,7 +725,7 @@ function renderGrid() {
   grid.innerHTML = data.map(d => {
     const monthEvents = filtered
       .filter(e => new Date(e.date).getMonth() === d.month)
-      .sort((a, b) => a.date.localeCompare(b.date));
+      .sort((a, b) => a.date.localeCompare(b.date) || (a.startTime||'').localeCompare(b.startTime||''));
     const eventList = monthEvents.map(e => {
       const cls = DEPT_CLASS[e.dept];
       const dd = new Date(e.date);
@@ -768,7 +768,7 @@ function renderGrid() {
 
 function renderTimeline() {
   const container = document.getElementById('timelineView');
-  const filtered = getFiltered().sort((a, b) => a.date.localeCompare(b.date));
+  const filtered = getFiltered().sort((a, b) => a.date.localeCompare(b.date) || (a.startTime||'').localeCompare(b.startTime||''));
   let html = '';
 
   for (let m = 0; m < 12; m++) {
