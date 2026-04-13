@@ -393,18 +393,6 @@ body::before {
 .dept-option.selected.good { background: var(--good-bg); border-color: var(--good-border); color: var(--good); }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 28px; }
 
-/* Export panel */
-.export-info {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px;
-  margin-top: 24px;
-  font-size: 13px;
-  color: var(--text-muted);
-  line-height: 1.8;
-}
-
 /* Responsive */
 @media (max-width: 900px) {
   .calendar-grid { grid-template-columns: repeat(2, 1fr); }
@@ -426,9 +414,6 @@ body::before {
       <h1>活動排程行事曆<span>2026</span></h1>
     </div>
     <div class="header-actions">
-      <button class="btn" onclick="document.getElementById('importFile').click()">⬆ 匯入 JSON</button>
-      <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
-      <button class="btn" onclick="exportData()">⬇ 匯出 JSON</button>
       <button class="btn btn-primary" onclick="openModal()">＋ 新增活動</button>
     </div>
   </div>
@@ -486,10 +471,6 @@ body::before {
   <!-- Timeline View -->
   <div class="timeline" id="timelineView"></div>
 
-  <!-- Export Info -->
-  <div class="export-info">
-    💡 <strong>使用方式：</strong>點擊「＋ 新增活動」可加入新活動。在時間軸模式下可以看到活動詳細資訊，滑鼠移到活動上可編輯或刪除。資料儲存在瀏覽器中，重新整理不會遺失。點擊「匯出 JSON」可將資料備份。
-  </div>
 </div>
 
 <!-- Add/Edit Modal -->
@@ -556,7 +537,7 @@ body::before {
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.1/firebase-app.js';
-import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, writeBatch, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js';
+import { getFirestore, collection, getDocs, addDoc, doc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/11.8.1/firebase-firestore.js';
 
 const firebaseConfig = {
   apiKey: "AIzaSyDEeJz2Bs-O9SHAR5rEmWkGMwnZKL1xYzQ",
@@ -831,48 +812,10 @@ async function deleteEvent(id) {
   await loadEvents();
 }
 
-function exportData() {
-  const blob = new Blob([JSON.stringify(events, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'aama-2026-events.json';
-  a.click();
-}
-
-// Import (for future use)
-function handleImport(evt) {
-  const file = evt.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = async function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) { alert('匯入格式錯誤'); return; }
-      let overwrite = false;
-      if (events.length > 0 && !confirm(`目前有 ${events.length} 筆資料，要覆蓋還是合併？\n\n確定 → 合併\n取消 → 覆蓋`)) {
-        overwrite = true;
-      }
-      if (overwrite) {
-        const batch = writeBatch(db);
-        events.forEach(ev => batch.delete(doc(db, 'events', ev.id)));
-        await batch.commit();
-      }
-      for (const d of data) {
-        await addDoc(eventsCol, { name: d.name, dept: d.dept, date: d.date, type: d.type||'', target: d.target||'', status: d.status||'籌備中', note: d.note||'' });
-      }
-      await loadEvents();
-      alert(`匯入完成，共 ${events.length} 筆活動`);
-    } catch(err) { alert('匯入格式錯誤'); }
-    evt.target.value = '';
-  };
-  reader.readAsText(file);
-}
-
 // Expose functions to window for inline onclick handlers
 Object.assign(window, {
   switchView, scrollToMonth, setFilter, setTargetFilter, setStatusFilter,
-  openModal, closeModal, selectDept, saveEvent, editEvent, deleteEvent,
-  exportData, handleImport
+  openModal, closeModal, selectDept, saveEvent, editEvent, deleteEvent
 });
 
 // Init
