@@ -425,6 +425,9 @@ body::before {
 .dept-option.selected.learn { background: var(--learn-bg); border-color: var(--learn-border); color: var(--learn); }
 .dept-option.selected.create { background: var(--create-bg); border-color: var(--create-border); color: var(--create); }
 .dept-option.selected.good { background: var(--good-bg); border-color: var(--good-border); color: var(--good); }
+.form-row { display: flex; gap: 12px; }
+.form-row > div { flex: 1; }
+.form-row label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; letter-spacing: 0.5px; }
 .btn-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; }
 .btn-toggle {
   font-family: 'Poppins', 'Noto Sans TC', sans-serif;
@@ -482,23 +485,23 @@ body::before {
   .view-controls { flex-direction: column; }
   .filter-chip { font-size: 11px; padding: 5px 10px; }
   .year-tabs { flex-wrap: wrap; }
-  .modal-overlay { padding: 0; align-items: stretch; }
+  .modal-overlay { padding: 0; align-items: flex-start; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .modal {
-    width: 100%; max-width: 100%; border-radius: 0; padding: 20px 16px;
-    min-height: 100vh; margin: 0;
-    display: flex; flex-direction: column;
+    width: 100%; max-width: 100%; border-radius: 0;
+    padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
+    margin: 0; min-height: auto;
   }
   .modal h2 { font-size: 18px; margin-bottom: 14px; }
   .form-group { margin-bottom: 10px; }
   .form-group label { font-size: 11px; margin-bottom: 3px; }
-  .form-group input, .form-group select, .form-group textarea { padding: 7px 10px; font-size: 13px; }
+  .form-group input, .form-group select, .form-group textarea { padding: 8px 10px; font-size: 14px; }
   .form-group textarea { min-height: 40px; }
-  .form-group[style*="flex"] { flex-direction: column; gap: 10px !important; }
-  .form-group[style*="flex"] > div { flex: auto !important; }
+  .form-row { flex-direction: column; gap: 10px; }
   .dept-select-group { gap: 6px; }
   .dept-option { padding: 8px 6px; font-size: 13px; }
-  .btn-toggle { font-size: 12px; padding: 6px 4px; }
-  .modal-actions { margin-top: auto; padding-top: 16px; position: sticky; bottom: 0; background: var(--surface); }
+  .btn-group { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .btn-toggle { font-size: 12px; padding: 7px 4px; }
+  .modal-actions { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
   .timeline-event { flex-wrap: wrap; gap: 8px; padding: 10px 12px; }
   .event-date { width: auto; }
   .event-title { min-width: 100%; order: 10; font-size: 13px; }
@@ -592,22 +595,22 @@ body::before {
         <button class="dept-option good" data-dept="共好" onclick="selectDept(this)">共好</button>
       </div>
     </div>
-    <div class="form-group" style="display:flex;gap:12px;">
-      <div style="flex:1;">
+    <div class="form-group form-row">
+      <div>
         <label>開始日期</label>
         <input type="date" id="eventDate">
       </div>
-      <div style="flex:1;">
+      <div>
         <label>結束日期（選填，多天活動）</label>
         <input type="date" id="eventEndDate">
       </div>
     </div>
-    <div class="form-group" style="display:flex;gap:12px;">
-      <div style="flex:1;">
+    <div class="form-group form-row">
+      <div>
         <label>開始時間（選填）</label>
         <input type="time" id="eventStartTime">
       </div>
-      <div style="flex:1;">
+      <div>
         <label>結束時間（選填）</label>
         <input type="time" id="eventEndTime">
       </div>
