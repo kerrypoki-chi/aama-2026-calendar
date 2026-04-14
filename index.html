@@ -496,10 +496,16 @@ body::before {
   .modal h2 { font-size: 18px; margin-bottom: 14px; }
   .form-group { margin-bottom: 10px; }
   .form-group label { font-size: 11px; margin-bottom: 3px; }
-  .form-group input, .form-group select, .form-group textarea { padding: 8px 10px; font-size: 14px; }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 8px 10px; font-size: 14px;
+    width: 100%; max-width: 100%;
+    -webkit-appearance: none; appearance: none;
+    display: block; box-sizing: border-box;
+  }
+  .form-group select { -webkit-appearance: menulist; appearance: menulist; }
   .form-group textarea { min-height: 40px; }
   .form-row { flex-direction: column; gap: 10px; }
-  .form-row > div { width: 100%; }
+  .form-row > div { width: 100%; max-width: 100%; }
   .dept-select-group { gap: 6px; }
   .dept-option { padding: 8px 6px; font-size: 13px; }
   .btn-group { grid-template-columns: repeat(3, 1fr); gap: 6px; }
