@@ -498,10 +498,13 @@ body::before {
   .form-group label { font-size: 11px; margin-bottom: 3px; }
   .form-group input, .form-group select, .form-group textarea {
     padding: 8px 10px; font-size: 14px;
-    width: 100%; max-width: 100%;
-    display: block; box-sizing: border-box;
+    width: 100% !important; max-width: 100% !important;
+    display: block; box-sizing: border-box !important;
+    -webkit-appearance: none; appearance: none;
+    border-radius: 8px;
+    min-height: 44px;
   }
-  .form-group input[type="text"] { -webkit-appearance: none; appearance: none; }
+  .form-group select { -webkit-appearance: menulist; appearance: menulist; }
   .form-group textarea { min-height: 40px; }
   .form-row { flex-direction: column; gap: 10px; }
   .form-row > div { width: 100%; max-width: 100%; }
