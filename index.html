@@ -489,7 +489,9 @@ body::before {
   .modal {
     width: 100%; max-width: 100%; border-radius: 0;
     padding: 20px 16px calc(env(safe-area-inset-bottom, 0px) + 16px);
-    margin: 0; min-height: auto;
+    margin: 0; min-height: auto; flex-shrink: 1;
+    border-left: none; border-right: none;
+    overflow-x: hidden;
   }
   .modal h2 { font-size: 18px; margin-bottom: 14px; }
   .form-group { margin-bottom: 10px; }
