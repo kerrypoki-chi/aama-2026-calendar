@@ -712,7 +712,29 @@ let editingId = null;
 async function loadEvents() {
   const snap = await getDocs(query(eventsCol, orderBy('date')));
   events = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  await autoCompletePassedEvents();
   render();
+}
+
+async function autoCompletePassedEvents() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const toUpdate = events.filter(e => {
+    if (e.status === '已完成') return false;
+    // 用結束日期（多天活動），否則用開始日期
+    const checkDate = new Date(e.endDate || e.date);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate < today;
+  });
+  if (toUpdate.length === 0) return;
+  await Promise.all(toUpdate.map(e =>
+    updateDoc(doc(db, 'events', e.id), { status: '已完成' })
+  ));
+  // 更新本地資料
+  toUpdate.forEach(e => {
+    const idx = events.findIndex(ev => ev.id === e.id);
+    if (idx !== -1) events[idx].status = '已完成';
+  });
 }
 
 function getFiltered() {
